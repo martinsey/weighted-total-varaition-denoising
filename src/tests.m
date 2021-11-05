@@ -15,27 +15,49 @@ end
 
 function testD1p(testCase)
     [d1p, d2p] = diffOperator.fd(4);
-    d1pTest = [4, 0, 0,; -4, 4, 0; 0, -4, 4; 0, 0, -4];
-    d2pTest = [4, -4, 0, 0; 0, 4, -4, 0; 0, 0, 4, -4];
+    d1pTest = [-4, 0, 0,; 4, -4, 0; 0, 4, -4; 0, 0, 4];
+    d2pTest = [-4, 4, 0, 0; 0, -4, 4, 0; 0, 0, -4, 4];
     
-    diffdp1 = d1p - d1pTest;
-    diffdp2 = d2p - d2pTest;
+    diffdp1 = abs(d1p - d1pTest);
+    diffdp2 = abs(d2p - d2pTest);
     
-    assert(max(diffdp1(:)) < 5e-16)
-    assert(max(diffdp2(:)) < 5e-16)
+    assert(max(diffdp1(:)) < 5e-16);
+    assert(max(diffdp2(:)) < 5e-16);
 end
 
 function testD1m(testCase)
-    [d1p, d2p] = diffOperator.bd(4);
-    d1mTest = [-4, 0, 0; 4, -4, 0; 0, 4, -4; 0, 0, 4]
+    [d1m, d2m] = diffOperator.bd(4);
+    d1mTest = [-4, 0, 0,; 4, -4, 0; 0, 4, -4; 0, 0, 4];
     d2mTest = [-4, 4, 0, 0; 0, -4, 4, 0; 0, 0, -4, 4];
     
-    diffdm1 = d1p - d1mTest;
-    diffdm2 = d2p - d2mTest;
+    diffdm1 = abs(d1m - d1mTest);
+    diffdm2 = abs(d2m - d2mTest);
     
-    assert(max(diffdm1(:)) < 5e-16)
-    assert(max(diffdm2(:)) < 5e-16)
+    assert(max(diffdm1(:)) < 5e-16);
+    assert(max(diffdm2(:)) < 5e-16);
 end
+
+function testGrad(testCase)
+    u = [1, 2, 3; 4, 5, 6; 7, 8, 9];
+    ux_test = [1, 1; 1, 1; 1, 1] * 3;
+    uy_test = [3, 3, 3; 3, 3, 3] * 3;
+    [ux, uy] = diffOperator.grad(u, 3);
+    
+    diff_ux = abs(ux - ux_test);
+    diff_uy = abs(uy - uy_test);
+    
+    assert(max(diff_ux(:)) < 5e-16);
+    assert(max(diff_uy(:)) < 5e-16);
+end
+
+function testDiv(testCase)
+    p1 = [1, 2, 3; 4, 5, 6];
+    p2 = [1, 2; 3, 4; 5, 6];
+    
+    div_test = [1, 1; 1, 1] * 3 + [3, 3; 3, 3] * 3;
+    div = diffOperator.div(p1, p2);
+end
+    
 
 %% Optional file fixtures  
 function setupOnce(testCase)  % do not change function name
