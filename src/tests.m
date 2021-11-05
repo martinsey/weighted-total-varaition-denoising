@@ -25,6 +25,18 @@ function testD1p(testCase)
     assert(max(diffdp2(:)) < 5e-16)
 end
 
+function testD1m(testCase)
+    [d1p, d2p] = diffOperator.bd(4);
+    d1mTest = [-4, 0, 0; 4, -4, 0; 0, 4, -4; 0, 0, 4]
+    d2mTest = [-4, 4, 0, 0; 0, -4, 4, 0; 0, 0, -4, 4];
+    
+    diffdm1 = d1p - d1mTest;
+    diffdm2 = d2p - d2mTest;
+    
+    assert(max(diffdm1(:)) < 5e-16)
+    assert(max(diffdm2(:)) < 5e-16)
+end
+
 %% Optional file fixtures  
 function setupOnce(testCase)  % do not change function name
 % set a new path, for example
