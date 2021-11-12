@@ -11,8 +11,6 @@ function testReadImage(testCase)
     assert(max(diff(:)) < 5e-16)
 end
 
-
-
 function testD1p(testCase)
     [d1p, d2p] = diffOperator.fd(4);
     d1pTest = [-4, 0, 0,; 4, -4, 0; 0, 4, -4; 0, 0, 4];
@@ -57,7 +55,46 @@ function testDiv(testCase)
     div_test = [1, 1; 1, 1] * 3 + [3, 3; 3, 3] * 3;
     div = diffOperator.div(p1, p2);
 end
+
+function testD1mNeumann(testCase)
+    [d1m, d2m] = diffOperator.bdNeumann(4);
+    d1mTest = [0, -4, 0, 0; 0, 4, -4, 0; 0, 0, 4, -4; 0, 0, 0, 4];
+    d2mTest = [0, 0, 0, 0; -4, 4, 0, 0; 0, -4, 4, 0; 0, 0, -4, 4];
     
+    diffdm1 = abs(d1m - d1mTest);
+    diffdm2 = abs(d2m - d2mTest);
+    
+    assert(max(diffdm1(:)) < 5e-16);
+    assert(max(diffdm2(:)) < 5e-16);
+end
+
+function testD1pNeumann(testCase)
+    [d1p, d2p] = diffOperator.fdNeumann(4);
+    d1pTest = [-4, 0, 0, 0; 4, -4, 0, 0; 0, 4, -4, 0; 0, 0, 4, 0];
+    d2pTest = [-4, 4, 0, 0; 0, -4, 4, 0; 0, 0, -4, 4; 0, 0, 0, 0];
+    
+    diffdp1 = abs(d1p - d1pTest);
+    diffdp2 = abs(d2p - d2pTest);
+    
+    assert(max(diffdp1(:)) < 5e-16);
+    assert(max(diffdp2(:)) < 5e-16);
+end
+
+function testLaplaceNeumann(testCase)
+    n = 10;
+    f = zeros(n, n);
+    for x = 1:n
+        for y = 1:n
+            f(x, y) = 1;
+        end
+    end
+    [d1p, d2p] = diffOperator.fdNeumann(n);
+    [d1m, d2m] = diffOperator.bdNeumann(n);
+    laplace_1 = d2p * d2m;
+    laplce_2 = d1p * d1m;
+    laplace_1
+end
+
 
 %% Optional file fixtures  
 function setupOnce(testCase)  % do not change function name

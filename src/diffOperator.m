@@ -19,6 +19,24 @@ classdef diffOperator
             d2m = (eye(n - 1, n) * (-1) + [zeros(n - 1, 1), eye(n - 1)]) / h;
         end
         
+        function [d1m, d2m] = bdNeumann(n)
+            h = 1/n;
+            [d1m, d2m] = diffOperator.bd(n);
+            neumann = zeros(n, 1);
+            d1m = [neumann, d1m];
+            d2m = [neumann.'; d2m];
+        end
+        
+        function [d1p, d2p] = fdNeumann(n)
+            h = 1/n;
+            [d1p, d2p] = diffOperator.fd(n);
+            
+            neumann = zeros(n, 1);
+            
+            d1p = [d1p, neumann];
+            d2p = [d2p; neumann.'];
+        end
+        
         function [ux, uy] = grad(u, n)
             [d1p, d2p] = diffOperator.fd(n);
             ux = u * d1p;
