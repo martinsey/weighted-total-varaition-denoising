@@ -5,11 +5,15 @@ function laplace = laplace(XX1, YY1, XX2, YY2, m, n)
 laplace1 = sparse((m + 1) * n, (m + 1) * n);
 laplace2 = sparse(m * (n + 1), m * (n + 1));
 
+hx = 1/m;
+hy = 1/n;
+
 if isfile("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
     matrix = readmatrix("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt");
     laplace = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1));
 else
     for i = 1:((m + 1) * n)
+        {"laplace 1", i}
         if (XX1(i) == 0 || XX1(i) == m) % top and bottom boundary
             continue
         end
@@ -38,6 +42,7 @@ else
     end
 
     for i = 1:((m + 1) * n)
+        {"laplace 2", i}
         if YY2(i) == 0 || YY2(i) == n % left and right boundary
             continue
         end
@@ -67,7 +72,7 @@ else
 
     laplace = [laplace1, sparse((m + 1) * n,  (n + 1) * m); sparse(m * (n + 1), (m + 1) * n), laplace2];
     
-    [i1, i2, v] = find(laplace_c);
+    [i1, i2, v] = find(laplace);
     
     writematrix([i1, i2, v], "laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
 end

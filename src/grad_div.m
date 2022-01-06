@@ -12,6 +12,7 @@ if isfile("grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt")
 end
 
 for i = 1:((m + 1) * n)
+    {"gd 1", i}
     if XX1(i) == 0 || XX1(i) == m % top and bottom boundary
         continue
     end
@@ -28,6 +29,7 @@ for i = 1:((m + 1) * n)
 end
 
 for i = 1:(m * (n + 1))
+    {"gd 2", i}
     shift_i = i + (m + 1) * n;
     % i + YY(2) maps to (i + 1, j - 1)
     
