@@ -42,50 +42,24 @@ laplace_c = laplace(XX1, YY1, XX2, YY2, m, n);
 id = speye(size(laplace_c));
 grad_div_ = grad_div(XX1, YY1, XX2, YY2, m, n);
 
-h0div = speye(size(grad_div_)) - grad_div_;
-function res = dual_h0div(v)
-    res = sqrt(v' * h0div * v * hx * hy); % check this
-end
-
 pl = cat(2, p_0{1}, p_0{2});
 pl = pl';
 
 pltilde = cat(2, p_0{1}, p_0{2});
-pltilde = pltilde';
 
-g_func = @(p, p_res, eps) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps * p_res;
-eps_l = 1;
+g_func = @(p, p_res, eps_) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_res;
 
-[p_res_tilde, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
-p_res_tilde = g_func(pltilde, p_res_tilde, eps_l);
-
-p_res = p_res_tilde;
-
-tolerance_res = tol_l * dual_h0div(g_func(pltilde, p_res_tilde, eps_l));
-res_norm = dual_h0div(g_func(pl, p_res, eps_l));
-
-while (eps_l > eps || res_norm >= tolerance_res) && res_norm >= 1e-5
+counter = 0
+while counter <= 100
     [p_res, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
 
     A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps * d_pdelta;
-    p_res = g_func(pl, p_res, eps_l);
+    p_res = g_func(pl, p_res, eps);
     
     pldelta = A \ -p_res;
     pl = pl + pldelta;
-    [p_res, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
     
-    
-    res_norm = dual_h0div(g_func(pl, p_res, eps_l));
-    tolerance_res = tol_l * dual_h0div(g_func(pltilde, p_res_tilde, eps_l));
-    
-    [res_norm, tolerance_res]
-    eps_l
-    
-    if res_norm < tolerance_res
-        eps_l = max(theta_eps * eps_l, eps);
-        pltilde = pl;
-        p_res_tilde = p_res;
-    end
+    counter = counter + 1
 end
 
 p1 = pl(1:(m + 1) * n);

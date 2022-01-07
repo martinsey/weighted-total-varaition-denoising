@@ -1,6 +1,8 @@
 function [divp, dx, dy] = solve_upper_level()
-f=ones(20,20) * 0.5;
-alpha=ones(size(f)) * 0.01;
+%f=ones(20,20) * 0.5;
+%f=tril(f);
+f = double(imread("test_image.jpeg")) / 255;
+alpha=ones(size(f)) * 0.00025;
 [m, n] = size(f);
 p_0 = {sparse(1, (m + 1) * n), sparse(1, (n + 1) * m)};
 
