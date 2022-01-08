@@ -15,9 +15,13 @@ for i = 1:((m + 1) * n)
     px2 = (pl(shift_i) + pl(shift_i - 1) + pl(shift_i + m - 1) + pl(shift_i + m)) / 4;
     px1 = pl(i);
     
-    dp = d_smooth_max(px1 - alpha01_c(i)) + d_smooth_max(-(px1 + alpha01_c(i)));
+    dp = d_smooth_max(px1 + px2 - alpha01_c(i)) + d_smooth_max(-(px1 + px2 + alpha01_c(i)));
     d_pdelta(i, i) = dp;
-    p_res(i) = smooth_max(px1 - alpha01_c(i)) - smooth_max(-(px1 + alpha01_c(i)));
+    d_pdelta(i, shift_i) = 1/4 * dp;
+    d_pdelta(i, shift_i - 1) = 1/4 * dp;
+    d_pdelta(i, shift_i + m - 1) = 1/4 * dp;
+    d_pdelta(i, shift_i + m) = 1/4 * dp;
+    p_res(i) = smooth_max(px1 + px2 - alpha01_c(i)) - smooth_max(-(px1 + px2 + alpha01_c(i)));
 end
 
 for i = 1:((n + 1) * m)
@@ -29,9 +33,13 @@ for i = 1:((n + 1) * m)
     px2 = pl(shift_i);
     px1 = (pl(i + YY2(i)) + pl(i + YY2(i) + m + 1) + pl(i + YY2(i) + 1) + pl(i + YY2(i) + 1 + m + 1)) / 4;
         
-    dp = d_smooth_max(px2 - alpha10_c(i)) + d_smooth_max(-(px2 + alpha10_c(i)));
+    dp = d_smooth_max(px1 + px2 - alpha10_c(i)) + d_smooth_max(-(px1 + px2 + alpha10_c(i)));
     d_pdelta(shift_i, shift_i) = dp;
-    p_res(shift_i) = smooth_max(px2 - alpha10_c(i)) - smooth_max(-(px2 + alpha10_c(i)));
+    d_pdelta(shift_i, i + YY2(i)) = 1/4 * dp;
+    d_pdelta(shift_i, i + YY2(i) + m + 1) = 1/4 * dp;
+    d_pdelta(shift_i, i + YY2(i) + 1) = 1/4 * dp;
+    d_pdelta(shift_i, i + YY2(i) + 1 + m + 1) = 1/4 * dp;
+    p_res(shift_i) = smooth_max(px1 + px2 - alpha10_c(i)) - smooth_max(-(px1 + px2 + alpha10_c(i)));
 end
 
 function y = smooth_max(r)
