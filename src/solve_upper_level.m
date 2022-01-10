@@ -1,5 +1,6 @@
 function [f_res] = solve_upper_level()
-f = double(imread("test_image.jpeg")) / 255;
+f = ones(20, 20);
+f = tril(f);
 alpha=ones(size(f)) * 0.00025;
 [m, n] = size(f);
 p_0 = {sparse(1, (m + 1) * n), sparse(1, (n + 1) * m)};

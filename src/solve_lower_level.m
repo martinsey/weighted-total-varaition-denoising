@@ -44,22 +44,38 @@ grad_div_ = grad_div(XX1, YY1, XX2, YY2, m, n);
 
 pl = cat(2, p_0{1}, p_0{2});
 pl = pl';
+[pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
 
-pltilde = cat(2, p_0{1}, p_0{2});
+g_func = @(p, p_pen, eps_) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_pen;
+h0div_norm = @(v) sqrt(v' * (speye((m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1))) * v * hx * hy);
 
-g_func = @(p, p_res, eps_) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_res;
+pltilde = pl;
+[pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c);
 
-counter = 0
-while counter <= 100
-    [p_res, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+eps_l = 1;
 
-    A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps * d_pdelta;
-    p_res = g_func(pl, p_res, eps);
-    
+h0divptilde = 0;
+while eps_l > eps || h0div_norm(g_func(pl, pl_pen, eps_l)) >= tol_l * h0divptilde
+    [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+
+    A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
+    p_res = g_func(pl, pl_pen, eps_l);
+
     pldelta = A \ -p_res;
     pl = pl + pldelta;
+    [pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
     
-    counter = counter + 1
+    [h0div_norm(g_func(pl, pl_pen, eps_l)), h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
+    eps_l
+    
+    if h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))
+        eps_l = max(theta_eps * eps_l, eps);
+        pltilde = pl;
+        [pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+        h0divptilde = h0div_norm(g_func(pltilde, pltilde_pen, eps_l));
+    elseif eps_l <= eps
+        break
+    end
 end
 
 p1 = pl(1:(m + 1) * n);
