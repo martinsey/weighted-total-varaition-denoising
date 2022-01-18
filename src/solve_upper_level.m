@@ -1,5 +1,5 @@
 function [f_res] = solve_upper_level()
-f = readImage("test_image_64_64.png");
+f = readImage("test_image.jpeg");
 if size(f, 3) == 3
     f = rgb2gray(f);
 end
