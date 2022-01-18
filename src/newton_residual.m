@@ -15,13 +15,14 @@ for i = 1:((m + 1) * n)
     px2 = (pl(shift_i) + pl(shift_i - 1) + pl(shift_i + m - 1) + pl(shift_i + m)) / 4;
     px1 = pl(i);
     
-    dp = d_smooth_max(px1 + px2 - alpha01_c(i)) + d_smooth_max(-(px1 + px2 + alpha01_c(i)));
-    d_pdelta(i, i) = dp;
-    d_pdelta(i, shift_i) = 1/4 * dp;
-    d_pdelta(i, shift_i - 1) = 1/4 * dp;
-    d_pdelta(i, shift_i + m - 1) = 1/4 * dp;
-    d_pdelta(i, shift_i + m) = 1/4 * dp;
-    p_res(i) = smooth_max(px1 + px2 - alpha01_c(i)) - smooth_max(-(px1 + px2 + alpha01_c(i)));
+    dpx = dpx_val(px1, px2, alpha01_c(i), delta);
+    [ddxx, ddxy] = grad1_dp(px1, px2, alpha01_c(i), delta);
+    d_pdelta(i, i) = ddxx;
+    d_pdelta(i, shift_i) = 1/4 * ddxy;
+    d_pdelta(i, shift_i - 1) = 1/4 * ddxy;
+    d_pdelta(i, shift_i + m - 1) = 1/4 * ddxy;
+    d_pdelta(i, shift_i + m) = 1/4 * ddxy;
+    p_res(i) = dpx;
 end
 
 for i = 1:((n + 1) * m)
@@ -33,33 +34,80 @@ for i = 1:((n + 1) * m)
     px2 = pl(shift_i);
     px1 = (pl(i + YY2(i)) + pl(i + YY2(i) + m + 1) + pl(i + YY2(i) + 1) + pl(i + YY2(i) + 1 + m + 1)) / 4;
         
-    dp = d_smooth_max(px1 + px2 - alpha10_c(i)) + d_smooth_max(-(px1 + px2 + alpha10_c(i)));
-    d_pdelta(shift_i, shift_i) = dp;
-    d_pdelta(shift_i, i + YY2(i)) = 1/4 * dp;
-    d_pdelta(shift_i, i + YY2(i) + m + 1) = 1/4 * dp;
-    d_pdelta(shift_i, i + YY2(i) + 1) = 1/4 * dp;
-    d_pdelta(shift_i, i + YY2(i) + 1 + m + 1) = 1/4 * dp;
-    p_res(shift_i) = smooth_max(px1 + px2 - alpha10_c(i)) - smooth_max(-(px1 + px2 + alpha10_c(i)));
+    dpy = dpy_val(px1, px2, alpha10_c(i), delta);
+    [ddyy, ddxy] = grad2_dp(px1, px2, alpha10_c(i), delta);
+    d_pdelta(shift_i, shift_i) = ddyy;
+    d_pdelta(shift_i, i + YY2(i)) = 1/4 * ddxy;
+    d_pdelta(shift_i, i + YY2(i) + m + 1) = 1/4 * ddxy;
+    d_pdelta(shift_i, i + YY2(i) + 1) = 1/4 * ddxy;
+    d_pdelta(shift_i, i + YY2(i) + 1 + m + 1) = 1/4 * ddxy;
+    p_res(shift_i) = dpy;
 end
 
-function y = smooth_max(r)
-    if r >= delta
-        y = r - delta / 2;
-    elseif r > 0 && r < delta
-        y = 0.5 * r^2 / delta;
+function y = dpx_val(p1, p2, alpha, delta)
+    p_norm = sqrt(p1^2 + p2^2);
+    if p_norm <= delta + alpha
+        y=0;
+        return
+    end
+    y = p1 / norm([p1, p2]) * d_smooth_pen(p_norm, alpha, delta);
+end
+
+function y = dpy_val(p1, p2, alpha, delta)
+    p_norm = sqrt(p1^2 + p2^2);
+    if p_norm <= delta + alpha
+        y=0;
+        return
+    end
+    
+    y = p2 / norm([p1, p2]) * d_smooth_pen(p_norm, alpha, delta);
+end
+
+function [ddxx, ddxy] = grad1_dp(p1, p2, alpha, delta)
+    p_norm = sqrt(p1^2 + p2^2);
+    
+    if p_norm <= delta + alpha
+        ddxx = 0;
+        ddxy = 0;
+        return
+    end
+    
+    ddxx = p2^2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1^2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
+    ddxy = p1 * p2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1 * p2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
+end
+
+function [ddyy, ddxy] = grad2_dp(p1, p2, alpha, delta)
+    p_norm = sqrt(p1^2 + p2^2);
+    
+    if p_norm <= delta + alpha
+        ddyy = 0;
+        ddxy = 0;
+        return
+    end
+    
+    ddyy = p1^2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p2^2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
+    ddxy = p1 * p2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1 * p2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
+end
+
+function y = d_smooth_pen(r, alpha, delta)
+    if r >= delta + alpha
+        y = r - alpha - delta /2;
+    elseif r > alpha && r < delta + alpha
+        y = 0.5 * (r - alpha)^2 / delta;
     else
         y = 0;
     end
 end
 
-function y = d_smooth_max(r)
-    if r >= delta
+function y = dd_smooth_pen(r, alpha, delta)
+    if r >= delta + alpha
         y = 1;
-    elseif r > 0 && r < delta
-        y = r / delta;
+    elseif r > alpha && r < delta + alpha
+        y = (r - alpha) / delta;
     else
         y = 0;
     end
 end
+
 end
 
