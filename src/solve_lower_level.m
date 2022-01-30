@@ -1,10 +1,17 @@
-function [divp, p1, p2] = solve_lower_level(f, alpha, p_0)
+function [divp, p, A, alpha10_c, alpha01_c] = solve_lower_level(f, alpha, p_0, XX1, YY1, XX2, YY2, noise)
 
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
 
 [m, n] = size(f);
 
-alpha01 = (alpha(1:(m-1), 1:n) + alpha(2:m, 1:n)) / 2; % check this
+hx = 1/m;
+hy = 1/n;
+
+if size(alpha, 2) == 1
+    alpha = reshape(alpha, m, n);
+end
+
+alpha01 = (alpha(1:(m-1), 1:n) + alpha(2:m, 1:n)) / 2;
 alpha01_c = sparse(m + 1, n);
 alpha01_c(2:m, 1:n) = alpha01;
 
@@ -15,9 +22,6 @@ alpha10_c(1:m, 2:n) = alpha10;
 alpha01_c = alpha01_c(:);
 alpha10_c = alpha10_c(:);
 
-hx = 1/m;
-hy = 1/n;
-
 dx_f = (f(2:m, 1:n) - f(1:m-1, 1:n)) / hx;
 dx_f_vec = sparse(m + 1, n);
 dx_f_vec(2:m, 1:n) = dx_f;
@@ -27,16 +31,6 @@ dy_f = (f(1:m, 2:n) - f(1:m, 1:(n-1))) / hy;
 dy_f_vec = sparse(m, n + 1);
 dy_f_vec(1:m, 2:n) = dy_f;
 dy_f_vec = dy_f_vec(:);
-
-
-[X1, Y1] = ndgrid(0:m, 1:n);
-[X2, Y2] = ndgrid(1:m, 0:n);
-
-XX1 = X1(:);
-YY1 = Y1(:);
-
-XX2 = X2(:);
-YY2 = Y2(:);
 
 laplace_c = laplace(XX1, YY1, XX2, YY2, m, n);
 id = speye(size(laplace_c));
@@ -65,9 +59,6 @@ while eps_l > eps || h0div_norm(g_func(pl, pl_pen, eps_l)) >= tol_l * h0divptild
     pl = pl + pldelta;
     [pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
     
-    [h0div_norm(g_func(pl, pl_pen, eps_l)), h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
-    eps_l
-    
     if h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))
         eps_l = max(theta_eps * eps_l, eps);
         pltilde = pl;
@@ -88,6 +79,7 @@ dx_p1 = (p1(2:m + 1, 1:n) - p1(1:m, 1:n)) / hx;
 p2 = reshape(p2, m, n + 1);
 dy_p2 = (p2(1:m, 2:n + 1) - p2(1:m, 1:n)) / hy;
 
+p = [p1(:), p2(:)];
 divp = dx_p1 + dy_p2;
 
 end
