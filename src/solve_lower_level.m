@@ -1,4 +1,4 @@
-function [divp, p, A, alpha10_c, alpha01_c] = solve_lower_level(f, alpha, p_0, XX1, YY1, XX2, YY2, noise)
+function [divp, p, A, alpha10_c, alpha01_c] = solve_lower_level(f, alpha, XX1, YY1, XX2, YY2)
 
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
 
@@ -22,6 +22,13 @@ alpha10_c(1:m, 2:n) = alpha10;
 alpha01_c = alpha01_c(:);
 alpha10_c = alpha10_c(:);
 
+%divp = readmatrix("mock_divp.txt");
+%p = readmatrix("mock_p.txt");
+%matrix = readmatrix("mock_A.txt");
+%A = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1)*n + m*(n + 1), (m + 1)*n + m*(n + 1));
+
+%return
+
 dx_f = (f(2:m, 1:n) - f(1:m-1, 1:n)) / hx;
 dx_f_vec = sparse(m + 1, n);
 dx_f_vec(2:m, 1:n) = dx_f;
@@ -36,6 +43,7 @@ laplace_c = laplace(XX1, YY1, XX2, YY2, m, n);
 id = speye(size(laplace_c));
 grad_div_ = grad_div(XX1, YY1, XX2, YY2, m, n);
 
+p_0 = {sparse(1, (m + 1) * n), sparse(1, (n + 1) * m)};
 pl = cat(2, p_0{1}, p_0{2});
 pl = pl';
 [pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
@@ -51,21 +59,25 @@ eps_l = 1;
 h0divptilde = 0;
 while eps_l > eps || h0div_norm(g_func(pl, pl_pen, eps_l)) >= tol_l * h0divptilde
     [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
-
+  
     A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
     p_res = g_func(pl, pl_pen, eps_l);
-
+    
     pldelta = A \ -p_res;
     pl = pl + pldelta;
-    [pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+    [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+    A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
     
-    if h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))
+    [h0div_norm(g_func(pl, pl_pen, eps_l)), tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
+    eps_l
+    
+    if eps_l <= eps && h0div_norm(g_func(pl, pl_pen, eps_l)) <= eps
+        break
+    elseif h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))
         eps_l = max(theta_eps * eps_l, eps);
         pltilde = pl;
         [pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
         h0divptilde = h0div_norm(g_func(pltilde, pltilde_pen, eps_l));
-    elseif eps_l <= eps
-        break
     end
 end
 

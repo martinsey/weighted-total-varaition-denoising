@@ -33,7 +33,7 @@ for i = 1:((n + 1) * m)
         
     px2 = pl(shift_i);
     px1 = (pl(i + YY2(i)) + pl(i + YY2(i) + m + 1) + pl(i + YY2(i) + 1) + pl(i + YY2(i) + 1 + m + 1)) / 4;
-        
+    
     dpy = dpy_val(px1, px2, alpha10_c(i), delta);
     [ddyy, ddxy] = grad2_dp(px1, px2, alpha10_c(i), delta);
     d_pdelta(shift_i, shift_i) = ddyy;
@@ -46,7 +46,7 @@ end
 
 function y = dpx_val(p1, p2, alpha, delta)
     p_norm = sqrt(p1^2 + p2^2);
-    if p_norm <= delta + alpha
+    if p_norm <= alpha
         y=0;
         return
     end
@@ -55,7 +55,7 @@ end
 
 function y = dpy_val(p1, p2, alpha, delta)
     p_norm = sqrt(p1^2 + p2^2);
-    if p_norm <= delta + alpha
+    if p_norm <= alpha
         y=0;
         return
     end
@@ -66,7 +66,7 @@ end
 function [ddxx, ddxy] = grad1_dp(p1, p2, alpha, delta)
     p_norm = sqrt(p1^2 + p2^2);
     
-    if p_norm <= delta + alpha
+    if p_norm <= alpha
         ddxx = 0;
         ddxy = 0;
         return
@@ -79,7 +79,7 @@ end
 function [ddyy, ddxy] = grad2_dp(p1, p2, alpha, delta)
     p_norm = sqrt(p1^2 + p2^2);
     
-    if p_norm <= delta + alpha
+    if p_norm <= alpha
         ddyy = 0;
         ddxy = 0;
         return
