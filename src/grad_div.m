@@ -7,7 +7,7 @@ hy = 1/n;
 if isfile("grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt")
     matrix = readmatrix("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt");
     grad_div = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1));
-    
+    max(grad_div);
     return
 end
 

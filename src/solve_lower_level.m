@@ -1,4 +1,4 @@
-function [divp, p, A, alpha10_c, alpha01_c] = solve_lower_level(f, alpha, XX1, YY1, XX2, YY2)
+function [divp, p, A] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2)
 
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
 
@@ -6,28 +6,6 @@ function [divp, p, A, alpha10_c, alpha01_c] = solve_lower_level(f, alpha, XX1, Y
 
 hx = 1/m;
 hy = 1/n;
-
-if size(alpha, 2) == 1
-    alpha = reshape(alpha, m, n);
-end
-
-alpha01 = (alpha(1:(m-1), 1:n) + alpha(2:m, 1:n)) / 2;
-alpha01_c = sparse(m + 1, n);
-alpha01_c(2:m, 1:n) = alpha01;
-
-alpha10 = (alpha(1:m, 1:(n-1)) + alpha(1:m, 2:n)) / 2;
-alpha10_c = sparse(m, n + 1);
-alpha10_c(1:m, 2:n) = alpha10;
-
-alpha01_c = alpha01_c(:);
-alpha10_c = alpha10_c(:);
-
-%divp = readmatrix("mock_divp.txt");
-%p = readmatrix("mock_p.txt");
-%matrix = readmatrix("mock_A.txt");
-%A = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1)*n + m*(n + 1), (m + 1)*n + m*(n + 1));
-
-%return
 
 dx_f = (f(2:m, 1:n) - f(1:m-1, 1:n)) / hx;
 dx_f_vec = sparse(m + 1, n);
@@ -49,7 +27,7 @@ pl = pl';
 [pl_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
 
 g_func = @(p, p_pen, eps_) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_pen;
-h0div_norm = @(v) sqrt(v' * (speye((m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1))) * v * hx * hy);
+h0div_norm = @(v) sqrt(v' * ((speye((m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1))) \ v) * hx * hy);
 
 pltilde = pl;
 [pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c);
@@ -67,9 +45,6 @@ while eps_l > eps || h0div_norm(g_func(pl, pl_pen, eps_l)) >= tol_l * h0divptild
     pl = pl + pldelta;
     [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
     A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
-    
-    [h0div_norm(g_func(pl, pl_pen, eps_l)), tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
-    eps_l
     
     if eps_l <= eps && h0div_norm(g_func(pl, pl_pen, eps_l)) <= eps
         break
@@ -91,7 +66,7 @@ dx_p1 = (p1(2:m + 1, 1:n) - p1(1:m, 1:n)) / hx;
 p2 = reshape(p2, m, n + 1);
 dy_p2 = (p2(1:m, 2:n + 1) - p2(1:m, 1:n)) / hy;
 
-p = [p1(:), p2(:)];
+p = [p1(:); p2(:)];
 divp = dx_p1 + dy_p2;
 
 end
