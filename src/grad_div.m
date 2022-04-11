@@ -1,53 +1,100 @@
-function grad_div = grad_div(XX1, YY1, XX2, YY2, m, n)
-grad_div = sparse((m + 1) * n + m * (n + 1), m * (n + 1) + (m + 1) * n);
+function grad_div_l = grad_div(m, n)
 
-hx = 1/m;
-hy = 1/n;
-
-if isfile("grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt")
-    matrix = readmatrix("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt");
-    grad_div = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1));
-    max(grad_div);
+if isfile("../data/grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt") && false
+    matrix = readmatrix("../data/grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt");
+    grad_div_l = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1));
     return
 end
 
-for i = 1:((m + 1) * n)
-    {"gd 1", i}
-    if XX1(i) == 0 || XX1(i) == m % top and bottom boundary
+div = sparse(m * n,  (m + 1) * n + (n + 1) * m);
+
+[X_div_in, Y_div_in] = ndgrid(1:m, 1:n);
+XX_div_in = X_div_in(:);
+YY_div_in = Y_div_in(:);
+
+for i = 1: m*n
+    if XX_div_in(i) == 1
+        div(i, i + YY_div_in(i)) = 1;
         continue
     end
     
-    shift_i = i + (m + 1) * n - YY1(i); %maps to (i, j - 1)
-    
-    grad_div(i, i + 1) = 1 / hx^2;
-    grad_div(i, i) = -2 / hx^2;
-    grad_div(i, i - 1) = 1 / hx^2;
-    grad_div(i, shift_i + m + 1) = 1 / (hx * hy);
-    grad_div(i, shift_i + 1) = -1 / (hx * hy);
-    grad_div(i, shift_i + m) = -1 / (hx * hy);
-    grad_div(i, shift_i) = 1 / (hx * hy);
-end
-
-for i = 1:(m * (n + 1))
-    {"gd 2", i}
-    shift_i = i + (m + 1) * n;
-    % i + YY(2) maps to (i + 1, j - 1)
-    
-    if YY2(i) == 0 || YY2(i) == n
+    if XX_div_in(i) == m
+         div(i, i + YY_div_in(i) - 1) = -1;
         continue
     end
     
-    grad_div(shift_i, i + YY2(i) - 1 + 2 * (m + 1)) = 1 / (hx * hy);
-    grad_div(shift_i, i + YY2(i) - 2 + 2 * (m + 1)) = -1 / (hx * hy);
-    grad_div(shift_i, i + YY2(i) - 1 + m + 1) = -1 / (hx * hy);
-    grad_div(shift_i, i + YY2(i) - 1) = 1 / (hx * hy);
-    grad_div(shift_i, shift_i + m) = 1 / hy^2;
-    grad_div(shift_i, shift_i) = -2 / hy^2;
-    grad_div(shift_i, shift_i - m) = 1 / hy^2;
+    div(i, i + YY_div_in(i) - 1) = -1;
+    div(i, i + YY_div_in(i)) = 1;
 end
 
-[i1, i2, v] = find(grad_div);
-writematrix([i1, i2, v], "grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt");
+for i = 1: m*n
+    if YY_div_in(i) == 1
+        div(i, (m + 1) * n + i + m) = 1;
+        continue
+    end
+    
+    if YY_div_in(i) == n
+        div(i, (m + 1) * n + i) = -1
+        continue
+    end
+    div(i, (m + 1) * n + i) = -1;
+    div(i, (m + 1) * n + i + m) = 1;
+end
+
+[X_div, Y_div] = ndgrid(1:m, 1:n + 1);
+XX_div = X_div(:);
+YY_div = Y_div(:);
+
+dx = sparse((m - 1) * n , m * n);
+dy = sparse(m * (n - 1) , m * n);
+[X_grad, Y_grad] = ndgrid(1:m - 1, 1:n);
+XX_grad = X_grad(:);
+YY_grad = Y_grad(:);
+
+for i = 1:(m - 1)*n
+    dx(i, i + YY_grad(i) - 1) = -1;
+    dx(i, i + YY_grad(i)) = 1;
+end
+
+[X_grad, Y_grad] = ndgrid(1:m, 1:n - 1);
+XX_grad = X_grad(:);
+YY_grad = Y_grad(:);
+
+for i = 1:(n - 1) * m
+    dy(i, i) = -1;
+    dy(i, i + m) = 1;
+end
+
+grad_div = [dx; dy] * div;
+
+[X_graddiv, Y_graddiv] = ndgrid(0:m, 1:n);
+XX_graddiv = X_graddiv(:);
+YY_graddiv = Y_graddiv(:);
+grad_div_l = sparse((m + 1) * n + (n + 1) * m, (m + 1) * n + (n + 1) * m);
+
+for i=1:(m + 1) * n
+    if XX_graddiv(i) == 0 || XX_graddiv(i) == m
+        continue
+    end
+    grad_div_l(i, :) = grad_div(i - 2 * YY_graddiv(i) + 1, :);
+end
+
+[X_graddiv, Y_graddiv] = ndgrid(1:m, 0:n);
+XX_graddiv = X_graddiv(:);
+YY_graddiv = Y_graddiv(:);
+
+j = 0;
+for i=1:(n + 1) * m
+   if YY_graddiv(i) == 0 || YY_graddiv(i) == n
+       j = j + 1;
+       continue
+   end
+   
+   grad_div_l(i + (m + 1) * n, :) = grad_div(i + (m - 1) * n - j, :);
+end
+
+[i1, i2, v] = find(grad_div_l);
+writematrix([i1, i2, v], "../data/grad_div-" + num2str(m) + "-" +  num2str(n) + ".txt");
 
 end
 
