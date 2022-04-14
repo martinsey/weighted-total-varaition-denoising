@@ -8,8 +8,8 @@ laplace2 = sparse(m * (n + 1), m * (n + 1));
 hx = 1/m;
 hy = 1/n;
 
-if isfile("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
-    matrix = readmatrix("laplace-" + num2str(m) + "-" +  num2str(n) + ".txt");
+if isfile("../data/laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
+    matrix = readmatrix("../data/laplace-" + num2str(m) + "-" +  num2str(n) + ".txt");
     laplace = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), (m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1));
 else
     for i = 1:((m + 1) * n)
@@ -114,7 +114,7 @@ else
     
     [i1, i2, v] = find(laplace);
     
-    writematrix([i1, i2, v], "laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
+    writematrix([i1, i2, v], "../data/laplace-" + num2str(m) + "-" +  num2str(n) + ".txt")
 end
 end
 

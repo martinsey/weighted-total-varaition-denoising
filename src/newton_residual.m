@@ -46,19 +46,19 @@ for i = 1:((m + 1) * n)
     
     i1(5*i - 3) = i;
     j1(5*i - 3) = shift_i;
-    v1(5*i - 3) = 1/4 * ddxy;
+    v1(5*i - 3) = 1/16 * ddxy;
     
     i1(5*i - 2) = i;
     j1(5*i - 2) = shift_i - 1;
-    v1(5*i - 2) = 1/4 * ddxy;
+    v1(5*i - 2) = 1/16 * ddxy;
     
     i1(5*i - 1) = i;
     j1(5*i - 1) = shift_i + m - 1;
-    v1(5*i - 1) = 1/4 * ddxy;
+    v1(5*i - 1) = 1/16 * ddxy;
     
     i1(5*i) = i;
     j1(5*i) = shift_i + m;
-    v1(5*i) = 1/4 * ddxy;
+    v1(5*i) = 1/16 * ddxy;
     
     p_res(i) = dpx;
 end
@@ -101,19 +101,19 @@ for i = 1:((n + 1) * m)
     
     i1(5*(i + (m + 1) * n) - 3) = shift_i;
     j1(5*(i + (m + 1) * n) - 3) = i + YY2(i);
-    v1(5*(i + (m + 1) * n) - 3) = 1/4 * ddxy;
+    v1(5*(i + (m + 1) * n) - 3) = 1/16 * ddxy;
     
     i1(5*(i + (m + 1) * n) - 2) = shift_i;
     j1(5*(i + (m + 1) * n) - 2) = i + YY2(i) + m + 1;
-    v1(5*(i + (m + 1) * n) - 2) = 1/4 * ddxy;
+    v1(5*(i + (m + 1) * n) - 2) = 1/16 * ddxy;
     
     i1(5*(i + (m + 1) * n) - 1) = shift_i;
     j1(5*(i + (m + 1) * n) - 1) = i + YY2(i) + 1;
-    v1(5*(i + (m + 1) * n) - 1) = 1/4 * ddxy;
+    v1(5*(i + (m + 1) * n) - 1) = 1/16 * ddxy;
     
     i1(5*(i + (m + 1) * n)) = shift_i;
     j1(5*(i + (m + 1) * n)) = i + YY2(i) + 1 + m + 1;
-    v1(5*(i + (m + 1) * n)) = 1/4 * ddxy;
+    v1(5*(i + (m + 1) * n)) = 1/16 * ddxy;
     p_res(shift_i) = dpy;
 end
  
