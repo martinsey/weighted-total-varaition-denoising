@@ -54,9 +54,6 @@ while max_iter > iter_counter
 
     A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
     
-    [h0div_norm(g_func(pl, pl_pen, eps_l)), tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
-    eps_l
-    
     if eps_l <= eps
         break
     elseif h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))

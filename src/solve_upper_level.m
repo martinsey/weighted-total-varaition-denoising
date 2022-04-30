@@ -2,13 +2,13 @@ function [f_res] = solve_upper_level(n_w, lambda, alpha_up, alpha_down)
 
 sigma_down = (0.1)^2*(1-(sqrt(2)/n_w));%0.00798;
 sigma_up  = (0.1)^2*(1+1.0*(sqrt(2)/n_w));%0.01202;
-f = readImage("test_image_256_256.png");
+f = readImage("../data/test_image_256_256.png");
 
 if size(f, 3) == 3
     f = rgb2gray(f);
 end
 
-f_noise = readImage("noise.png");
+f_noise = readImage("../data/noise.png");
 %f_noise = f - readmatrix("mock_divp.txt");
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
 
@@ -24,7 +24,7 @@ c=1e-8;
 theta_m=0.25;
 theta_p=2;
 
-alpha=ones(size(f_noise)) * 0.001;
+alpha=ones(size(f_noise)) * 0.0005;
 
 [X1, Y1] = ndgrid(0:m, 1:n);
 [X2, Y2] = ndgrid(1:m, 0:n);

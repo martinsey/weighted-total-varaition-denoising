@@ -41,8 +41,8 @@ for i = 1:((m + 1) * n)
     px2 = (pl(shift_i) + pl(shift_i - 1) + pl(shift_i + m - 1) + pl(shift_i + m)) / 4;
     px1 = pl(i);
     
-    dpx = dp_val(px1, px2, alpha01_c(i), delta);
-    [ddxx, ddxy] = grad_dp(px1, px2, alpha01_c(i), delta);
+    dpx = dp_val(px1, px2, alpha10_c(i), delta);
+    [ddxx, ddxy] = grad_dp(px1, px2, alpha10_c(i), delta);
  
     i1(5*i - 4) = i;
     j1(5*i - 4) = i;
@@ -95,8 +95,8 @@ for i = 1:((n + 1) * m)
     px2 = pl(shift_i);
     px1 = (pl(i + YY2(i)) + pl(i + YY2(i) + m + 1) + pl(i + YY2(i) + 1) + pl(i + YY2(i) + 1 + m + 1)) / 4;
     
-    dpy = dp_val(px2, px1, alpha10_c(i), delta);
-    [ddyy, ddxy] = grad_dp(px2, px1, alpha10_c(i), delta);
+    dpy = dp_val(px2, px1, alpha01_c(i), delta);
+    [ddyy, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
     
     
     i1(5*(i + (m + 1) * n) - 4) = shift_i;
