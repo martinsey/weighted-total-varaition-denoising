@@ -1,12 +1,15 @@
 function [ext_int_x,  ext_int_y] = interpolation(m, n)
 
-if isfile("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt") && isfile("ext_int_y-" + num2str(m) + "-" +  num2str(n) + ".txt")
+if isfile("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt") && isfile("../data/ext_int_y-" + num2str(m) + "-" +  num2str(n) + ".txt")
     matrix1 = readmatrix("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt");
     matrix2 = readmatrix("../data/ext_int_y-" + num2str(m) + "-" +  num2str(n) + ".txt");
     ext_int_x = sparse(matrix1(:,1), matrix1(:,2), matrix1(:, 3), (m + 1) * n, m * n);
     ext_int_y = sparse(matrix2(:,1), matrix2(:,2), matrix2(:, 3), (n + 1) * m, m * n);
     return
 end
+isfile("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt")
+isfile("ext_int_y-" + num2str(m) + "-" +  num2str(n) + ".txt")
+throw()
 
 extend_x = ext_x_bottom(m + 1, n) * ext_x_top(m,n);
 extend_y = ext_y_right(m, n + 1) * ext_y_left(m, n);

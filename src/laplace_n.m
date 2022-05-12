@@ -11,8 +11,8 @@ YY = Y(:);
 hx = 1/m;
 hy = 1/n;
 
-if isfile("laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
-    matrix = readmatrix("laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt");
+if isfile("../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
+    matrix = readmatrix("../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt");
     laplace = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), m*n, m*n);
 else
     for i = 1:m*n
@@ -89,7 +89,7 @@ else
     
     [i1, i2, v] = find(laplace);
     
-    writematrix([i1, i2, v], "laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
+    writematrix([i1, i2, v], "../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
 end
 end
 

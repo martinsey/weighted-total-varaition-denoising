@@ -1,4 +1,4 @@
-function [divp, p, A] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2)
+function [divp, p, A_l] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2)
 max_iter = 100;
 
 
@@ -54,9 +54,13 @@ while max_iter > iter_counter
 
     A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
     
-    if eps_l <= eps
+    [h0div_norm(g_func(pl, pl_pen, eps_l)), tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))]
+    eps_l
+    
+    if eps_l <= eps && h0div_norm(g_func(pltilde, pltilde_pen, eps_l)) < 1e-3
         break
     elseif h0div_norm(g_func(pl, pl_pen, eps_l)) < tol_l * h0div_norm(g_func(pltilde, pltilde_pen, eps_l))
+        iter_counter = 0;
         eps_l = max(theta_eps * eps_l, eps);
         p1 = pl(1:(m + 1) * n);
         p2 = pl((m + 1) * n + 1:((m + 1) * n + (n + 1) * m));
@@ -72,8 +76,11 @@ while max_iter > iter_counter
         figure(1), imshow(f + divp);
         drawnow();
         pltilde = pl;
+        A_l = A;
         [pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
         h0divptilde = h0div_norm(g_func(pltilde, pltilde_pen, eps_l));
+    else
+        iter_counter = iter_counter + 1;
     end
     
     iter_counter = iter_counter + 1;

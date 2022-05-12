@@ -50,19 +50,19 @@ for i = 1:((m + 1) * n)
     
     i1(5*i - 3) = i;
     j1(5*i - 3) = shift_i;
-    v1(5*i - 3) = 1/8 * ddxy;
+    v1(5*i - 3) = 1/4 * ddxy;
     
     i1(5*i - 2) = i;
     j1(5*i - 2) = shift_i - 1;
-    v1(5*i - 2) = 1/8 * ddxy;
+    v1(5*i - 2) = 1/4 * ddxy;
     
     i1(5*i - 1) = i;
     j1(5*i - 1) = shift_i + m - 1;
-    v1(5*i - 1) = 1/8 * ddxy;
+    v1(5*i - 1) = 1/4 * ddxy;
     
     i1(5*i) = i;
     j1(5*i) = shift_i + m;
-    v1(5*i) = 1/8 * ddxy;
+    v1(5*i) = 1/4 * ddxy;
     
     p_res(i) = dpx;
 end
@@ -93,7 +93,7 @@ for i = 1:((n + 1) * m)
     end
         
     px2 = pl(shift_i);
-    px1 = (pl(i + YY2(i)) + pl(i + YY2(i) + m + 1) + pl(i + YY2(i) + 1) + pl(i + YY2(i) + 1 + m + 1)) / 4;
+    px1 = (pl(i - m - 1 + YY2(i)) + pl(i - m - 1 + YY2(i) + 1) + pl(i + YY2(i)) + pl(i + YY2(i) + 1)) / 4;
     
     dpy = dp_val(px2, px1, alpha01_c(i), delta);
     [ddyy, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
@@ -104,20 +104,20 @@ for i = 1:((n + 1) * m)
     v1(5*(i + (m + 1) * n) - 4) = ddyy;
     
     i1(5*(i + (m + 1) * n) - 3) = shift_i;
-    j1(5*(i + (m + 1) * n) - 3) = i + YY2(i);
-    v1(5*(i + (m + 1) * n) - 3) = 1/8 * ddxy;
+    j1(5*(i + (m + 1) * n) - 3) = i - m - 1 + YY2(i);
+    v1(5*(i + (m + 1) * n) - 3) = 1/4 * ddxy;
     
     i1(5*(i + (m + 1) * n) - 2) = shift_i;
-    j1(5*(i + (m + 1) * n) - 2) = i + YY2(i) + m + 1;
-    v1(5*(i + (m + 1) * n) - 2) = 1/8 * ddxy;
+    j1(5*(i + (m + 1) * n) - 2) = i - m - 1 + YY2(i) + 1;
+    v1(5*(i + (m + 1) * n) - 2) = 1/4 * ddxy;
     
     i1(5*(i + (m + 1) * n) - 1) = shift_i;
-    j1(5*(i + (m + 1) * n) - 1) = i + YY2(i) + 1;
-    v1(5*(i + (m + 1) * n) - 1) = 1/8 * ddxy;
+    j1(5*(i + (m + 1) * n) - 1) = i + YY2(i);
+    v1(5*(i + (m + 1) * n) - 1) = 1/4 * ddxy;
     
     i1(5*(i + (m + 1) * n)) = shift_i;
-    j1(5*(i + (m + 1) * n)) = i + YY2(i) + 1 + m + 1;
-    v1(5*(i + (m + 1) * n)) = 1/8 * ddxy;
+    j1(5*(i + (m + 1) * n)) = i + YY2(i) + 1;
+    v1(5*(i + (m + 1) * n)) = 1/4 * ddxy;
     p_res(shift_i) = dpy;
 end
  
@@ -142,7 +142,7 @@ function [ddxx, ddxy] = grad_dp(p1, p2, alpha, delta)
     end
     
     ddxx = p2^2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1^2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
-    ddxy = p1*p2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1*p2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
+    ddxy = -p1*p2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1*p2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
 end
  
 function y = d_smooth_pen(r, alpha, delta)
