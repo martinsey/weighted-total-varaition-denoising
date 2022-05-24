@@ -2,15 +2,13 @@ function [f_res] = solve_upper_level(n_w, lambda, alpha_up, alpha_down)
 
 sigma_down = (0.1)^2*(1-(sqrt(2)/n_w));%0.00798;
 sigma_up  = (0.1)^2*(1+(sqrt(2)/n_w));%0.01202;
-f = readImage("../data/test_image_256_256.png");
 
-if size(f, 3) == 3
-    f = rgb2gray(f);
-end
-
-f_noise = readImage("../data/noise.png");
+load cameraman.mat;
+f_noise = cam_noisy_01;
+f = cam;
 %f_noise = f - readmatrix("mock_divp.txt");
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
+
 
 [m, n] = size(f_noise);
 hx = 1/m;
@@ -24,8 +22,7 @@ c=1e-8;
 theta_m=0.25;
 theta_p=2;
 
-alpha = ones(size(f_noise)) * 0.001;
-
+alpha = readmatrix("alpha22.txt");
 [X1, Y1] = ndgrid(0:m, 1:n);
 [X2, Y2] = ndgrid(1:m, 0:n);
 
@@ -48,9 +45,10 @@ tau_k = tau_0;
 
 alpha10_c = ext_int_x * alpha(:);
 alpha01_c = ext_int_y * alpha(:);
+eps_final = eps;
 while counter <= 1000
     if size(divp_updated, 1) == 0
-        [divp, pk, A] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
+        [divp, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
         imwrite(f_noise + divp, "initial.png") 
         
         ssim(f_noise + divp, f)
@@ -94,13 +92,13 @@ while counter <= 1000
         end
         
         px2 = pk(shift_i);
-        px1 = (pk(i + YY2(i)) + pk(i + YY2(i) + m + 1) + pk(i + YY2(i) + 1) + pk(i + YY2(i) + 1 + m + 1)) / 4;
+        px1 = (pk(i - m - 1 + YY2(i)) + pk(i - m - 1 + YY2(i) + 1) + pk(i + YY2(i)) + pk(i + YY2(i) + 1)) / 4; % wrong
         
         pk_norm(shift_i) = sqrt(px1^2 + px2^2);
     end
     
 
-    J_prime = -1 / eps * spdiags(ones(size(pk_norm)) .* pk .* arrayfun(@(r)dd_smooth_pen(r, delta), pk_norm - [alpha01_c; alpha10_c]), 0, (m + 1) * n + (n + 1) * m, (m + 1) * n + (n + 1) * m) * qk;  % does this depend on alpha_10c and alhpha01c
+    J_prime = -1 / eps_final * spdiags(ones(size(pk_norm)) .* pk .* arrayfun(@(r)dd_smooth_pen(r, delta), pk_norm - [alpha01_c; alpha10_c]), 0, (m + 1) * n + (n + 1) * m, (m + 1) * n + (n + 1) * m) * qk;  % does this depend on alpha_10c and alhpha01c
     J_prime1 =  ext_int_x' * J_prime(1:(m + 1) * n);
     J_prime2 = ext_int_y' * J_prime((m + 1) * n + 1:(m + 1) * n + (n + 1) * m);
     J_prime = J_prime1 + J_prime2 + lambda * (speye(n*m, n*m) - laplace_n_) * alpha(:);
@@ -109,10 +107,9 @@ while counter <= 1000
     while true
         alpha_updated = alpha_proj(alpha(:) - tau_k * J_grad, alpha_up, alpha_down);
         figure(2), surfc(flipud(reshape(alpha_updated,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
-        set(gcf,'position',[50,100,300,300]) 
         alpha10_c = ext_int_x * alpha_updated(:);
         alpha01_c = ext_int_y * alpha_updated(:);
-        [divp_updated, pk, A] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
+        [divp_updated, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
 
         [J(reshape(alpha_updated, m, n), reshape(divp_updated, m, n)),  J(reshape(alpha, m, n), reshape(divp, m, n))]
         if J(reshape(alpha_updated, m, n), reshape(divp_updated, m, n)) >  J(reshape(alpha, m, n), reshape(divp, m, n)) + c * J_prime'*(alpha_updated(:) - alpha(:))

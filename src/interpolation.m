@@ -9,7 +9,6 @@ if isfile("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt") && isf
 end
 isfile("../data/ext_int_x-" + num2str(m) + "-" +  num2str(n) + ".txt")
 isfile("ext_int_y-" + num2str(m) + "-" +  num2str(n) + ".txt")
-throw()
 
 extend_x = ext_x_bottom(m + 1, n) * ext_x_top(m,n);
 extend_y = ext_y_right(m, n + 1) * ext_y_left(m, n);
