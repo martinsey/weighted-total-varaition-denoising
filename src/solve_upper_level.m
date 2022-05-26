@@ -4,8 +4,8 @@ sigma_down = (0.1)^2*(1-(sqrt(2)/n_w));%0.00798;
 sigma_up  = (0.1)^2*(1+(sqrt(2)/n_w));%0.01202;
 
 load cameraman.mat;
-f_noise = cam_noisy_01;
-f = cam;
+f_noise = readImage("../data/parrot_noise.png");
+f = readImage("../data/parrotgray.png");
 %f_noise = f - readmatrix("mock_divp.txt");
 [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
 
@@ -22,7 +22,7 @@ c=1e-8;
 theta_m=0.25;
 theta_p=2;
 
-alpha = readmatrix("alpha22.txt");
+alpha = ones(m, n) * 0.0025;
 [X1, Y1] = ndgrid(0:m, 1:n);
 [X2, Y2] = ndgrid(1:m, 0:n);
 

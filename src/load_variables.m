@@ -4,8 +4,8 @@ function [beta, gamma, delta, eps, tol_l, theta_eps] = load_variables()
 beta=1e-4;
 gamma=1e-4;
 delta=0.005;
-eps=1e-8;
-tol_l=0.01;
+eps=7e-9;
+tol_l=0.1;
 theta_eps=0.6;
 end
 

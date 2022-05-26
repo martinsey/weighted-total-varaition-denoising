@@ -29,39 +29,37 @@ p_0 = {sparse(1, (m + 1) * n), sparse(1, (n + 1) * m)};
 pl = cat(2, p_0{1}, p_0{2});
 pl = pl';
 
-g_func = @(p, p_pen, eps_) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_pen;
+g_func = @(p, p_pen) -beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + p_pen;
 h0div_norm = @(v) sqrt(v' * ((speye((m + 1) * n + m * (n + 1), (m + 1) * n + m * (n + 1)) - grad_div_) \ v) * hx * hy);
-g_err = @(p, p_pen, eps_) h0div_norm(-beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + 1/ eps_ * p_pen);
+g_err = @(p, p_pen) h0div_norm(-beta * laplace_c * p - grad_div_ * p + gamma * p - [dx_f_vec; dy_f_vec] + p_pen);
 
 pltilde = pl;
-[pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c);
 
-eps_l = 0.0001;
+eps_l = 0.001;
+[pltilde_pen, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c, eps_l);
 
 pl_pen = [];
 p_delta = [];
 
 iter_counter = 0;
 while true
-    [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+    [pl_pen, d_pdelta] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c, eps_l);
     
-    A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
-    p_res = g_func(pl, pl_pen, eps_l);
+    A = -beta * laplace_c - grad_div_ + gamma * id + d_pdelta;
+    p_res = g_func(pl, pl_pen);
     
     pldelta = A \ -p_res;
     pl = pl + pldelta;
-    [pl_pen, d_pdelta, p_norms] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
-    
-    m_norm = max(p_norms)
+    [pl_pen, d_pdelta, p_norms] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c, eps_l);
         
-    A = -beta * laplace_c - grad_div_ + gamma * id + 1 / eps_l * d_pdelta;
+    A = -beta * laplace_c - grad_div_ + gamma * id + d_pdelta;
     
-    [g_err(pl, pl_pen, eps_l), tol_l * g_err(pltilde, pltilde_pen, eps_l)]
+    [g_err(pl, pl_pen), tol_l * g_err(pltilde, pltilde_pen)]
     eps_l
     
     if eps_l <= eps
         break
-    elseif g_err(pl, pl_pen, eps_l) < tol_l * g_err(pltilde, pltilde_pen, eps_l)
+    elseif g_err(pl, pl_pen) < tol_l * g_err(pltilde, pltilde_pen) || g_err(pl, pl_pen) < 1e-10
         iter_counter = 0;
         eps_l = max(theta_eps * eps_l, eps);
         p1 = pl(1:(m + 1) * n);
@@ -78,8 +76,8 @@ while true
         figure(1), imshow(f + divp);
         drawnow();
         pltilde = pl;
-        A_l = A;
-        [pltilde_pen, ~, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c);
+        [pltilde_pen, d_pdelta_tilde, ~] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c, eps_l);
+        A_l = -beta * laplace_c - grad_div_ + gamma * id + d_pdelta_tilde;
     elseif iter_counter >= max_iter
         break
     else

@@ -23,7 +23,7 @@ YY1 = Y1(:);
 XX2 = X2(:);
 YY2 = Y2(:);
 
-alpha = readmatrix("alpha22.txt");
+alpha = ones(size(f)) * 0.0025;
 
 lambda = 1e-9
 n_w = 7;
