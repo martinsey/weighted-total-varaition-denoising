@@ -20,7 +20,7 @@ else
         end
     
         if YY1(i) == 1 %left boundary
-            laplace1(i, i) = -(2 / hx^2 + 1 / hy^2);
+            laplace1(i, i) = -(2 / hx^2 + 2 / hy^2);
             laplace1(i, i + m + 1) = 1 / hy^2;
             laplace1(i, i - 1) = 1 / hx^2;
             laplace1(i, i + 1) = 1 / hx^2;
@@ -28,7 +28,7 @@ else
         end
     
         if YY1(i) == n %right boundary
-            laplace1(i, i) = -(2 / hx^2 + 1 / hy^2);
+            laplace1(i, i) = -(2 / hx^2 + 2 / hy^2);
             laplace1(i, i - m - 1) = 1 / hy^2;
             laplace1(i, i + 1) = 1 / hx^2;
             laplace1(i, i - 1) = 1 / hx^2;
@@ -78,7 +78,7 @@ else
         end
     
         if XX2(i) == 1 % top boundary
-            laplace2(i, i) = -(1 / hx^2 + 2 / hy^2);
+            laplace2(i, i) = -(2 / hx^2 + 2 / hy^2);
             laplace2(i, i + 1) = 1 / hx^2;
             laplace2(i, i - m) = 1 / hy^2;
             laplace2(i, i + m) = 1 / hy^2;
@@ -86,7 +86,7 @@ else
         end
     
         if XX2(i) == m %bottom boundary
-            laplace2(i, i) = -(1 / hx^2 + 2 / hy^2);
+            laplace2(i, i) = -(2 / hx^2 + 2 / hy^2);
             laplace2(i, i - 1) = 1 / hx^2;
             laplace2(i, i - m) = 1 / hy^2;
             laplace2(i, i + m) = 1 / hy^2;

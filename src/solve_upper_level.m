@@ -3,16 +3,20 @@ function [f_res] = solve_upper_level(n_w, lambda, alpha_up, alpha_down)
 sigma_down = (0.1)^2*(1-(sqrt(2)/n_w));%0.00798;
 sigma_up  = (0.1)^2*(1+(sqrt(2)/n_w));%0.01202;
 
-load cameraman.mat;
+load cameraman.mat
 f_noise = readImage("../data/parrot_noise.png");
 f = readImage("../data/parrotgray.png");
-%f_noise = f - readmatrix("mock_divp.txt");
-[beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
+
+%f_noise = cam_noisy_01
+%f = cam;
+[beta, gamma, delta, eps_min, eps_max, tol_l, theta_eps] = load_variables();
 
 
 [m, n] = size(f_noise);
 hx = 1/m;
 hy = 1/n;
+
+tol_b = 0.001;
 
 [ext_int_x,  ext_int_y] = interpolation(m, n);
 
@@ -22,7 +26,7 @@ c=1e-8;
 theta_m=0.25;
 theta_p=2;
 
-alpha = ones(m, n) * 0.0025;
+alpha = readmatrix("alpha8.txt");
 [X1, Y1] = ndgrid(0:m, 1:n);
 [X2, Y2] = ndgrid(1:m, 0:n);
 
@@ -45,10 +49,18 @@ tau_k = tau_0;
 
 alpha10_c = ext_int_x * alpha(:);
 alpha01_c = ext_int_y * alpha(:);
-eps_final = eps;
+prox = [];
+eps = eps_max;
+is_final = true;
 while counter <= 1000
+    if eps == eps_min && ~is_final
+        fprintf("is_final_exec")
+        is_final = true;
+        [divp, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps);
+    end
+    
     if size(divp_updated, 1) == 0
-        [divp, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
+        [divp, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps);
         imwrite(f_noise + divp, "initial.png") 
         
         ssim(f_noise + divp, f)
@@ -106,15 +118,24 @@ while counter <= 1000
     
     while true
         alpha_updated = alpha_proj(alpha(:) - tau_k * J_grad, alpha_up, alpha_down);
+        
         figure(2), surfc(flipud(reshape(alpha_updated,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
         alpha10_c = ext_int_x * alpha_updated(:);
         alpha01_c = ext_int_y * alpha_updated(:);
-        [divp_updated, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
+        [divp_updated, pk, A, eps_final] = solve_lower_level(f_noise, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps);
+        
+        eps = max(0.6*eps, eps_min)
+        
+        if eps == eps_min && ~is_final
+            prox(counter + 1) = H1_norm(alpha_updated(:) - alpha(:));
+            break
+        end
 
         [J(reshape(alpha_updated, m, n), reshape(divp_updated, m, n)),  J(reshape(alpha, m, n), reshape(divp, m, n))]
         if J(reshape(alpha_updated, m, n), reshape(divp_updated, m, n)) >  J(reshape(alpha, m, n), reshape(divp, m, n)) + c * J_prime'*(alpha_updated(:) - alpha(:))
             tau_k =  theta_m * tau_k
         else
+            prox(counter + 1) = H1_norm(alpha_updated(:) - alpha(:));
             alpha = alpha_updated;
             divp = divp_updated;
             ssim(f_noise + divp, f)
@@ -130,6 +151,11 @@ while counter <= 1000
     end
     
     counter = counter + 1
+    prox_measure = prox(counter) / prox(1)
+    
+    if prox_measure < 4e-5 || tau_k < 1e-3
+        break
+    end
 end
 
 f_res = f_noise + divp;

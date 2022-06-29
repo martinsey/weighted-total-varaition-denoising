@@ -8,7 +8,7 @@ end
 
 f = cam_noisy_01;
 
-[beta, gamma, delta, eps, tol_l, theta_eps] = load_variables();
+[beta, gamma, delta, eps_min, eps_max, tol_l, theta_eps] = load_variables();
 
 [m, n] = size(f);
 hx = 1/m;
@@ -23,7 +23,7 @@ YY1 = Y1(:);
 XX2 = X2(:);
 YY2 = Y2(:);
 
-alpha = ones(size(f)) * 0.0025;
+alpha = readmatrix("alpha15.txt");
 
 lambda = 1e-9
 n_w = 7;
@@ -33,20 +33,17 @@ w = ones(n_w, n_w) / n_w^2;
 R = @(v) circ_conv(v.^2, w);
 laplace_n_ = laplace_n(m, n);
 H1_norm = @(v) 1 / sqrt(m*n) * sqrt(v(:)' * ((speye(m*n) - laplace_n_) * v(:)));
-J = @(alpha, divp) 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(R(divp) - sigma_up)).^2)) / (n*m) + 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(sigma_down - R(divp))).^2)) / (n*m) + 0.5 * lambda * H1_norm(alpha(:))^2;
+J = @(alpha, divp) 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(R(divp) - sigma_up)).^2)) / (n*m) + 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(sigma_down - R(divp))).^2)) / (n*m) + 0.5 * lambda * H1_norm(alpha(:))^2
 
 alpha10_c = ext_int_x * alpha(:);
 alpha01_c = ext_int_y * alpha(:);
 
-[divp, p, A, ~] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2);
-writematrix(divp, "mock_divp.txt");
-writematrix(p, "mock_p");
-[i1, i2, v] = find(A);
-writematrix([i1, i2, v], "mock_A");
-imshow(f + divp)
+[divp, p, A, ~] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps_min);
 J(alpha, divp)
 
-ssim(f + divp, f_orig)
+f_rec = f + divp;
+imwrite(f_rec, "par_rec_const_alpha_staggered.png");
+save("cam_bilevel_rec_staggered.mat", "f_rec", "alpha");
 
 function y = smooth_max(r, delta)
     if r >= delta
