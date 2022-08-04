@@ -23,7 +23,7 @@ YY1 = Y1(:);
 XX2 = X2(:);
 YY2 = Y2(:);
 
-alpha = readmatrix("alpha15.txt");
+alpha = readmatrix("alpha7.txt");
 
 lambda = 1e-9
 n_w = 7;
@@ -38,7 +38,7 @@ J = @(alpha, divp) 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(R(divp) - sigma_
 alpha10_c = ext_int_x * alpha(:);
 alpha01_c = ext_int_y * alpha(:);
 
-[divp, p, A, ~] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps_min);
+[divp, p, A, ~] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, true);
 J(alpha, divp)
 
 f_rec = f + divp;

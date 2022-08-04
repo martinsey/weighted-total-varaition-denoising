@@ -1,9 +1,10 @@
-function [divp, p, A_l, eps_final] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, eps)
-max_iter = 30;
+function [divp, p, A_l, eps_final] = solve_lower_level(f, alpha10_c, alpha01_c, XX1, YY1, XX2, YY2, is_final)
 
-
-[beta, gamma, delta, ~, ~, tol_l, theta_eps] = load_variables();
-
+if ~is_final
+    [beta, gamma, delta, eps, tol_l, theta_eps, max_iter] = load_variables();
+else
+    [beta, gamma, delta, eps, tol_l, theta_eps, max_iter] = load_variables_final();
+end
 [m, n] = size(f);
 
 hx = 1/m;
