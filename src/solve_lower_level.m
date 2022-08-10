@@ -20,7 +20,7 @@ dy_f_vec = sparse(m, n + 1);
 dy_f_vec(1:m, 2:n) = dy_f;
 dy_f_vec = dy_f_vec(:);
 
-laplace_c = laplace(XX1, YY1, XX2, YY2, m, n);
+laplace_c = laplace(m, n);
 id = speye(size(laplace_c));
 [grad_div_, ~, ~, ~] = grad_div(m, n);
 laplace_n_ = laplace_n(m, n);

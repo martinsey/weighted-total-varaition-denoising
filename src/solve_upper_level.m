@@ -3,7 +3,7 @@ function [f_res] = solve_upper_level(n_w, lambda, alpha_up, alpha_down)
 sigma_down = (0.1)^2*(1-(sqrt(2)/n_w));%0.00798;
 sigma_up  = (0.1)^2*(1+(sqrt(2)/n_w));%0.01202;
 
-load cameraman.mat
+load ../data/cameraman.mat
 f_noise = cam_noisy_01;
 f = cam;
 
@@ -16,17 +16,17 @@ f = cam;
 hx = 1/m;
 hy = 1/n;
 
-tol_b = 0.001;
+tol_b = 0.1;
 
 [ext_int_x,  ext_int_y] = interpolation(m, n);
 
 
-tau_0 = 1.0;
+tau_0 = 2.0;
 c=1e-8;
 theta_m=0.25;
 theta_p=2;
 
-alpha = readmatrix("alpha5.txt");
+alpha = ones(m, n) * 0.0025;
 [X1, Y1] = ndgrid(0:m, 1:n);
 [X2, Y2] = ndgrid(1:m, 0:n);
 
@@ -50,7 +50,7 @@ tau_k = tau_0;
 alpha10_c = ext_int_x * alpha(:);
 alpha01_c = ext_int_y * alpha(:);
 prox = [];
-is_final = true;
+is_final = false;
 is_first_final = false;
 while counter <= 1000
     if is_final && is_first_final

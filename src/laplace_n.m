@@ -1,8 +1,7 @@
-function laplace = laplace_n(m, n)
+function laplace_n_ = laplace_n(m, n)
 %LAPLACE Summary of this function goes here
 %   Detailed explanation goes here
 
-laplace = sparse(m * n, m * n);
 
 [X, Y] = ndgrid(1:m, 1:n);
 XX = X(:);
@@ -11,85 +10,176 @@ YY = Y(:);
 hx = 1/m;
 hy = 1/n;
 
-if isfile("../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
-    matrix = readmatrix("../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt");
-    laplace = sparse(matrix(:,1), matrix(:,2), matrix(:, 3), m*n, m*n);
-else
-    for i = 1:m*n
-        {"laplace_n 1", i}
+i1=[];j1=[];v1=[];
+for i = 1:m*n
+    % corners
+    if (XX(i) == 1 && YY(i) == 1)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 1 / (hy^2));
         
-        % corners
-        if (XX(i) == 1 && YY(i) == 1)
-            laplace(i, i) = -(1 / (hx^2) + 1 / (hy^2));
-            laplace(i, i + 1) = 1 / hx^2;
-            laplace(i, i + m ) = 1 / hy^2;
-            continue
-        end
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i + 1;
+        v1(5*i - 3) = 1 / (hx^2);
         
-        if (XX(i) == 1 && YY(i) == n)
-            laplace(i, i) = -(1 / (hx^2) + 1 / (hy^2));
-            laplace(i, i + 1) = 1 / hx^2;
-            laplace(i, i - m ) = 1 / hy^2;
-            continue
-        end
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i + m;
+        v1(5*i - 2) = 1 / (hy^2);
         
-        if (XX(i) == m && YY(i) == 1)
-            laplace(i, i) = -(1 / (hx^2) + 1 / (hy^2));
-            laplace(i, i - 1) = 1 / hx^2;
-            laplace(i, i + m ) = 1 / hy^2;
-            continue
-        end
+        continue
+    end
         
-        if (XX(i) == m && YY(i) == n)
-            laplace(i, i) = -(1 / (hx^2) + 1 / (hy^2));
-            laplace(i, i - 1) = 1 / hx^2;
-            laplace(i, i - m ) = 1 / hy^2;
-            continue
-        end 
+    if (XX(i) == 1 && YY(i) == n)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 1 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i + 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i - m;
+        v1(5*i - 2) = 1 / (hy^2);
+        
+        continue
+    end
+        
+    if (XX(i) == m && YY(i) == 1)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 1 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i - 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i + m;
+        v1(5*i - 2) = 1 / (hy^2);
+        continue
+    end
+        
+    if (XX(i) == m && YY(i) == n)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 1 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i - 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i - m;
+        v1(5*i - 2) = 1 / (hy^2);
+        continue
+    end 
         
         % edges 
-        if (XX(i) == 1)
-            laplace(i, i) = -(1 / (hx^2) + 2 / (hy^2));
-            laplace(i, i + 1) = 1 / hx^2;
-            laplace(i, i + m) = 1 / hy^2;
-            laplace(i, i - m) = 1 / hy^2;
-            continue
-        end
+    if (XX(i) == 1)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 2 / (hy^2));
         
-        if (YY(i) == 1)
-            laplace(i, i) = -(2 / (hx^2) + 1 / (hy^2));
-            laplace(i, i + 1) = 1 / hx^2;
-            laplace(i, i - 1) = 1 / hx^2;
-            laplace(i, i + m) = 1 / hy^2;
-            continue
-        end
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i + 1;
+        v1(5*i - 3) = 1 / (hx^2);
         
-        if (XX(i) == m)
-            laplace(i, i) = -(1 / (hx^2) + 2 / (hy^2));
-            laplace(i, i - 1) = 1 / hx^2;
-            laplace(i, i - m) = 1 / hy^2;
-            laplace(i, i + m) = 1 / hy^2;
-            continue
-        end
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i - m;
+        v1(5*i - 2) = 1 / (hy^2);
         
-        if (YY(i) == n)
-            laplace(i, i) = -(2 / (hx^2) + 1 / (hy^2));
-            laplace(i, i + 1) = 1 / hx^2;
-            laplace(i, i - 1) = 1 / hx^2;
-            laplace(i, i - m) = 1 / hy^2;
-            continue
-        end
-    
-        laplace(i, i) = -(2 / (hx^2) + 2 / (hy^2));
-        laplace(i, i + 1) = 1 / hx^2;
-        laplace(i, i - 1) = 1 / hx^2;
-        laplace(i, i + m) = 1 / hy^2;
-        laplace(i, i - m) = 1 / hy^2;
+        i1(5*i - 1) = i;
+        j1(5*i - 1) = i + m;
+        v1(5*i - 1) = 1 / (hy^2);
+        
+        continue
     end
-    
-    [i1, i2, v] = find(laplace);
-    
-    writematrix([i1, i2, v], "../data/laplace_n-" + num2str(m) + "-" +  num2str(n) + ".txt")
+        
+    if (YY(i) == 1)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(2 / (hx^2) + 1 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i - 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i + 1;
+        v1(5*i - 2) = 1 / (hx^2);
+        
+        i1(5*i - 1) = i;
+        j1(5*i - 1) = i + m;
+        v1(5*i - 1) = 1 / (hy^2);
+        
+        continue
+    end
+        
+    if (XX(i) == m)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(1 / (hx^2) + 2 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i - 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i - m;
+        v1(5*i - 2) = 1 / (hy^2);
+        
+        i1(5*i - 1) = i;
+        j1(5*i - 1) = i + m;
+        v1(5*i - 1) = 1 / (hy^2);
+        continue
+     end
+        
+     if (YY(i) == n)
+        i1(5*i - 4) = i;
+        j1(5*i - 4) = i;
+        v1(5*i - 4) = -(2 / (hx^2) + 1 / (hy^2));
+        
+        i1(5*i - 3) = i;
+        j1(5*i - 3) = i + 1;
+        v1(5*i - 3) = 1 / (hx^2);
+        
+        i1(5*i - 2) = i;
+        j1(5*i - 2) = i - 1;
+        v1(5*i - 2) = 1 / (hx^2);
+        
+        i1(5*i - 1) = i;
+        j1(5*i - 1) = i - m;
+        v1(5*i - 1) = 1 / (hy^2);
+        
+        continue
+     end
+     
+     i1(5*i - 4) = i;
+     j1(5*i - 4) = i;
+     v1(5*i - 4) = -(2 / (hx^2) + 2 / (hy^2));
+        
+     i1(5*i - 3) = i;
+     j1(5*i - 3) = i + 1;
+     v1(5*i - 3) = 1 / (hx^2);
+        
+     i1(5*i - 2) = i;
+     j1(5*i - 2) = i - m;
+     v1(5*i - 2) = 1 / (hy^2);
+        
+     i1(5*i - 1) = i;
+     j1(5*i - 1) = i + m;
+     v1(5*i - 1) = 1 / (hy^2);
+     
+     i1(5*i) = i;
+     j1(5*i) = i - 1;
+     v1(5*i) = 1 / (hx^2);
 end
+
+idx2keep_rows    = sum(abs([i1',j1',v1']),2)>0;
+laplace_n_ = [i1', j1', v1'];
+laplace_n_ = laplace_n_(idx2keep_rows, :);
+laplace_n_ = sparse(laplace_n_(:,1), laplace_n_(:,2), laplace_n_(:,3), m * n, m * n);
+
 end
 
