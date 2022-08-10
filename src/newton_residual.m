@@ -43,7 +43,7 @@ for i = 1:((m + 1) * n)
     px1 = pl(i);
     
     dpx = dp_val(px1, px2, alpha10_c(i), delta);
-    [ddxx, ~] = grad_dp(px1, px2, 0, alpha10_c(i), delta);
+    [ddxx, ~] = grad_dp(px1, px2, alpha10_c(i), delta);
  
     i1(5*i - 4) = i;
     j1(5*i - 4) = i;
@@ -54,7 +54,7 @@ for i = 1:((m + 1) * n)
     if (YY2(shift_i - (m + 1) * n) == 0)
         v1(5*i - 3) = 0;
     else
-        [~, ddxy] = grad_dp(px1, px2, pl(shift_i), alpha10_c(i), delta);
+        [~, ddxy] = grad_dp(px1, px2, alpha10_c(i), delta);
         v1(5*i - 3) = 1/4 * ddxy;
     end
     
@@ -64,7 +64,7 @@ for i = 1:((m + 1) * n)
     if (YY2(shift_i - 1 - (m + 1) * n) == 0)
         v1(5*i - 2) = 1/4 * 0;
     else
-        [~, ddxy] = grad_dp(px1, px2, pl(shift_i - 1), alpha10_c(i), delta);
+        [~, ddxy] = grad_dp(px1, px2, alpha10_c(i), delta);
         v1(5*i - 2) = 1/4 * ddxy;
     end
     
@@ -73,7 +73,7 @@ for i = 1:((m + 1) * n)
     if (YY2(shift_i + m - 1 - (m + 1) * n) == n)
         v1(5*i - 1) = 0;
     else
-        [~, ddxy] = grad_dp(px1, px2, pl(shift_i + m - 1), alpha10_c(i), delta);
+        [~, ddxy] = grad_dp(px1, px2, alpha10_c(i), delta);
         v1(5*i - 1) = 1/4 * ddxy;
     end
     
@@ -82,7 +82,7 @@ for i = 1:((m + 1) * n)
     if (YY2(shift_i + m - (m + 1) * n) == n)
         v1(5*i) = 0;
     else
-        [~, ddxy] = grad_dp(px1, px2, pl(shift_i + m), alpha10_c(i), delta);
+        [~, ddxy] = grad_dp(px1, px2, alpha10_c(i), delta);
         v1(5*i) = 1/4 * ddxy;
     end
     
@@ -119,7 +119,7 @@ for i = 1:((n + 1) * m)
     px1 = (pl(i - m - 1 + YY2(i)) + pl(i - m - 1 + YY2(i) + 1) + pl(i + YY2(i)) + pl(i + YY2(i) + 1)) / 4;
     
     dpy = dp_val(px2, px1, alpha01_c(i), delta);
-    [ddyy, ~] = grad_dp(px2, px1, 0, alpha01_c(i), delta);
+    [ddyy, ~] = grad_dp(px2, px1, alpha01_c(i), delta);
     
     
     i1(5*(i + (m + 1) * n) - 4) = shift_i;
@@ -131,7 +131,7 @@ for i = 1:((n + 1) * m)
     if (XX1(i - m - 1 + YY2(i)) == 0)
         v1(5*(i + (m + 1) * n) - 3) = 0;
     else
-        [~, ddxy] = grad_dp(px2, px1, pl(i - m - 1 + YY2(i)), alpha01_c(i), delta);
+        [~, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
         v1(5*(i + (m + 1) * n) - 3) = 1/4 * ddxy;
     end
     
@@ -140,7 +140,7 @@ for i = 1:((n + 1) * m)
     if XX1(i - m - 1 + YY2(i) + 1) == m
         v1(5*(i + (m + 1) * n) - 2) = 0;
     else
-        [~, ddxy] = grad_dp(px2, px1, pl(i - m - 1 + YY2(i) + 1), alpha01_c(i), delta);
+        [~, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
         v1(5*(i + (m + 1) * n) - 2) = 1/4 * ddxy;
     end
    
@@ -149,7 +149,7 @@ for i = 1:((n + 1) * m)
     if XX1(i + YY2(i)) == 0
         v1(5*(i + (m + 1) * n) - 1) = 0;
     else
-        [~, ddxy] = grad_dp(px2, px1, pl(i + YY2(i)), alpha01_c(i), delta);
+        [~, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
         v1(5*(i + (m + 1) * n) - 1) = 1/4 * ddxy;
     end
     
@@ -158,7 +158,7 @@ for i = 1:((n + 1) * m)
     if XX1(i + YY2(i) + 1) == m
         v1(5*(i + (m + 1) * n)) = 0;
     else
-        [~, ddxy] = grad_dp(px2, px1, pl(i + YY2(i) + 1), alpha01_c(i), delta);
+        [~, ddxy] = grad_dp(px2, px1, alpha01_c(i), delta);
         v1(5*(i + (m + 1) * n)) = 1/4 * ddxy;
     end
  
@@ -177,7 +177,7 @@ function y = dp_val(p1, p2, alpha, delta)
     y = p1 / p_norm * d_smooth_pen(p_norm, alpha, delta);
 end
  
-function [ddxx, ddxy] = grad_dp(p1, p2, p2i, alpha, delta)
+function [ddxx, ddxy] = grad_dp(p1, p2, alpha, delta)
     p_norm = sqrt(p1^2 + p2^2);
     if p_norm <= alpha
         ddxx = 0;
@@ -187,26 +187,6 @@ function [ddxx, ddxy] = grad_dp(p1, p2, p2i, alpha, delta)
     
     ddxx = p2^2 / p_norm^3  * d_smooth_pen(p_norm, alpha, delta) + p1^2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
     ddxy = -p1*p2 / p_norm^3 * d_smooth_pen(p_norm, alpha, delta) + p1 * p2 / p_norm^2 * dd_smooth_pen(p_norm, alpha, delta);
-end
- 
-function y = d_smooth_pen(r, alpha, delta)
-    if r >= delta + alpha
-        y = r - alpha - delta /2;
-    elseif r > alpha && r < delta + alpha
-        y = 0.5 * (r - alpha)^2 / delta;
-    else
-        y = 0;
-    end
-end
- 
-function y = dd_smooth_pen(r, alpha, delta)
-    if r >= delta + alpha
-        y = 1;
-    elseif r > alpha && r < delta + alpha
-        y = (r - alpha) / delta;
-    else
-        y = 0;
-    end
 end
  
 end

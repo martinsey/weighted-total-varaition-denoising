@@ -111,7 +111,7 @@ while counter <= 1000
     end
     
 
-    J_prime = -1 / eps_final * spdiags(ones(size(pk_norm)) .* pk .* arrayfun(@(r)dd_smooth_pen(r, delta), pk_norm - [alpha01_c; alpha10_c]), 0, (m + 1) * n + (n + 1) * m, (m + 1) * n + (n + 1) * m) * qk;  % does this depend on alpha_10c and alhpha01c
+    J_prime = -1 / eps_final * spdiags(ones(size(pk_norm)) .* pk .* arrayfun(@(r)dd_smooth_pen(r, 0, delta), pk_norm - [alpha01_c; alpha10_c]), 0, (m + 1) * n + (n + 1) * m, (m + 1) * n + (n + 1) * m) * qk;  % does this depend on alpha_10c and alhpha01c
     J_prime1 =  ext_int_x' * J_prime(1:(m + 1) * n);
     J_prime2 = ext_int_y' * J_prime((m + 1) * n + 1:(m + 1) * n + (n + 1) * m);
     J_prime = J_prime1 + J_prime2 + lambda * (speye(n*m, n*m) - laplace_n_) * alpha(:);
@@ -161,35 +161,4 @@ end
 
 f_res = f_noise + divp;
 
-end
-
-% check removed arguments
-function y = dd_smooth_pen(r, delta)
-    if r >= delta
-        y = 1;
-    elseif r > 0 && r < delta
-        y = r / delta;
-    else
-        y = 0;
-    end
-end
-
-function y = smooth_max(r, delta)
-    if r >= delta
-        y = r - delta / 2;
-    elseif r > 0 && r < delta
-        y = 0.5 * r^2 / delta;
-    else
-        y = 0;
-    end
-end
-
-function y = d_smooth_max(r, delta)
-    if r >= delta
-        y = 1;
-    elseif r > 0 && r < delta
-        y = r / delta;
-    else
-        y = 0;
-    end
 end

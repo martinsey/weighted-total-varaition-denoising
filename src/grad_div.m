@@ -159,6 +159,11 @@ i1 = i1(idx);
 idx = sum(abs(j1),1)>0;
 j1 = j1(idx);
 
+dx = dx/h;
+dy = dy/h;
+
+div = div/h;
+
 grad_div_l(j1, :) = grad_div_(i1, :);
 grad_div_l = grad_div_l / h^2;
 
