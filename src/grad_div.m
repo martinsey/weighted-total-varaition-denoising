@@ -1,4 +1,7 @@
 function [grad_div_l, dx, dy, div] = grad_div(m, n)
+%GRAD_DIV Get differential opearator representing grad div in a staggered
+%grid in col first order.
+
 h = 1 / sqrt(m*n);
 div = sparse(m * n,  (m + 1) * n + (n + 1) * m);
 

@@ -1,6 +1,5 @@
 function [alpha_k] = alpha_proj(alpha_tilde, alpha_up, alpha_down)
-%ALPHA_PROJ Summary of this function goes here
-%   Detailed explanation goes here
+%ALPHA_PROJ Execute projection of alpha in H1 onto [alpha_down, alpha_up]
 eps_alpha = 1e-12;
 tol_p = 1e-4;
 size_ = numel(alpha_tilde);
@@ -20,6 +19,7 @@ while true
     
     alpha_k = alpha_k + delta_alpha;
     
+    fprint("newpton step for executing alpha projection results in error %f", h1_dual(res_k))
     if h1_dual(res_k) < tol_p * h1_dual(res_0)
         break
     end

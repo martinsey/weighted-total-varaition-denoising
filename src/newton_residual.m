@@ -1,6 +1,5 @@
 function [p_res, d_pdelta, p_norms] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pl, alpha10_c, alpha01_c)
-%NEWTON_RESIDUAL Summary of this function goes here
-%   Detailed explanation goes here
+%NEWTON_RESIDUAL Calculate the newton residual at given point pl.
  
 p_res = zeros((m + 1) * n + (n + 1) * m, 1);
 p_norms = zeros((m + 1) * n + (n + 1) * m, 1);

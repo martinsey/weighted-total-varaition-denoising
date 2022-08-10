@@ -1,6 +1,6 @@
 function laplace_n_ = laplace_n(m, n)
-%LAPLACE Summary of this function goes here
-%   Detailed explanation goes here
+%LAPLACE Get standard laplace for single component with neumann boundary
+%conditin on a regular grid
 
 
 [X, Y] = ndgrid(1:m, 1:n);

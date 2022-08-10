@@ -1,4 +1,7 @@
 function [ext_int_x,  ext_int_y] = interpolation(m, n)
+% INTERPOLATION Get matrix for moving from Omega00 to OMEGA10 and OMAGE01
+% by extending padding the same values to the added axes and linearly
+% between two points.
 
 extend_x = ext_x_bottom(m + 1, n) * ext_x_top(m,n);
 extend_y = ext_y_right(m, n + 1) * ext_y_left(m, n);

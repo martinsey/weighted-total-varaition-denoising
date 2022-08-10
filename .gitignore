@@ -131,5 +131,5 @@ dmypy.json
 # Matlab
 */**.asv
 
-data/*
+
 .DS_Store
