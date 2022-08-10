@@ -5,7 +5,7 @@ A matlab package based on the [paper] (http://www2.mathematik.hu-berlin.de/~raut
 Source code is in the `src` folder. For denoising execute
 ```
 cd src
-bilevelTV_denoising(f, simga)
+bilevelTV_denoising(f, sigma)
 ```
 where
 * f the corrupted image in matlab format. 
@@ -21,7 +21,7 @@ or for an image from `.png, .jpeg, ...` format
 f=readimage($PATH_TO_IMAGE)
 f=im2double(f);
 f=rgb2gray(f);
-```.
+```
 Results will be written in `data/output` as `result.mat` file, which contains the reconstruction and the alpha.
 
 Note that execution for one image can take a while. On a macbook pro 2016 it took 1 hour.
