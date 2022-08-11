@@ -67,6 +67,14 @@ fprintf("Executing gradient descent for reduced objective functional \n")
 while true
     if size(divp_updated, 1) == 0 || (is_final && is_first_final)
         solve_lower_level;
+        
+        if is_final && is_first_final
+            is_first_final=false;
+        end
+        
+        u = f + divp;
+        figure(1), imshow(f + divp)
+        drawnow()
     end
     
     b = conv2(arrayfun(@(v)smooth_max(v, 0), R(divp) - sigma_up) - arrayfun(@(v)smooth_max(v, 0), sigma_down - R(divp)), w, "same");
@@ -93,6 +101,10 @@ while true
     J_old = J(reshape(alpha, m, n), reshape(divp, m, n));
     while true
         alpha_updated = alpha_proj(alpha(:) - tau_k * J_grad, alpha_up, alpha_down);
+        u = f + divp;
+            figure(2), surfc(flipud(reshape(alpha_updated,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
+            figure(1), imshow(f + divp)
+            drawnow()
         alpha10_c = extend_interpolate_x * alpha_updated(:);
         alpha01_c = extend_interpolate_y * alpha_updated(:);
         solve_lower_level
@@ -105,8 +117,11 @@ while true
             prox = [prox, H1_norm(alpha_updated(:) - alpha(:))];
             alpha = alpha_updated;
             tau_k = theta_p * tau_k;
-            fprintf("Sufficient decrease of J from %f to %f and set tau=%f \n", J_old, J_new, tau_k)
+            fprintf("Sufficient decrease of J from %f to %f and set tau=%f and proximity measure %f \n", J_old, J_new, tau_k, prox(end) / prox(1))
             u = f + divp;
+            figure(2), surfc(flipud(reshape(alpha,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
+            figure(1), imshow(f + divp)
+            drawnow()
             save("../data/output/result.mat", "u", "alpha")
             break
         end
@@ -115,9 +130,9 @@ while true
     prox_measure = prox(end) / prox(1);
     
     if ~is_final && (J_old - J_new) / J_new < 0.03
-        tau_k = 1;
         delta = delta_final;
         eps=eps_final;
+        tau_k=1;
         is_final=true;
         is_first_final=true;
     end

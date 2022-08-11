@@ -43,7 +43,7 @@ while true
     g_err_new = g_err(pl, pl_pen, eps_l);
     g_err_pltilde = g_err(pltilde, pltilde_pen, eps_l);
     
-    fprintf("Executing newton for lower level with error %f and best error %f at eps=%f \n", g_err_new, g_err_pltilde, eps_l);
+    fprintf("Executing newton for lower level with error %f and best error %f at eps=%e \n", g_err_new, g_err_pltilde, eps_l);
     if eps_l <= eps
         fprintf("Convergence has been achieved with norm of g %f \n", g_err_new);
         break
@@ -53,8 +53,8 @@ while true
         
         pltilde = pl;
         [pltilde_pen, d_pdelta_tilde, pk_norms] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c);
-        A = -beta * laplace_c - grad_div_ + gamma * id + 1/eps_l * d_pdelta_tilde;
-        eps_final = eps_l;
+        A_k = -beta * laplace_c - grad_div_ + gamma * id + 1/eps_l * d_pdelta_tilde;
+        A = A_k;
       
         if g_err(pl, pl_pen, eps_l) < tol_l || iter_counter >= max_iter
             iter_counter = 0;
