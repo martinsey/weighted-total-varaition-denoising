@@ -12,7 +12,7 @@ where
 * sigma noise level
 for example the image can be loaded via can be loaded via
 ```
-load data/input/cam.mat
+load data/input/cameraman.mat
 f = cam_noisy_01
 sigma=0.1
 ```
