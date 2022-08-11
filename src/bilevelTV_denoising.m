@@ -107,7 +107,7 @@ while true
             tau_k = theta_p * tau_k;
             fprintf("Sufficient decrease of J from %f to %f and set tau=%f \n", J_old, J_new, tau_k)
             u = f + divp;
-            save("../data/output/result.mat", u, alpha)
+            save("../data/output/result.mat", "u", "alpha")
             break
         end
     end

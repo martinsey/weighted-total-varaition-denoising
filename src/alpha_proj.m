@@ -19,7 +19,7 @@ while true
     
     alpha_k = alpha_k + delta_alpha;
     
-    fprint("newpton step for executing alpha projection results in error %f", h1_dual(res_k))
+    fprintf("newpton step for executing alpha projection results in error %f \n", h1_dual(res_k))
     if h1_dual(res_k) < tol_p * h1_dual(res_0)
         break
     end

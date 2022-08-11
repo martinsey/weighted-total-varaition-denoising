@@ -45,7 +45,7 @@ while true
     
     fprintf("Executing newton for lower level with error %f and best error %f at eps=%f \n", g_err_new, g_err_pltilde, eps_l);
     if eps_l <= eps
-        fprintf("Convergence has been achieved with norm of g %f", g_err_new);
+        fprintf("Convergence has been achieved with norm of g %f \n", g_err_new);
         break
     elseif g_err_new <= g_err_pltilde || g_err_new <= 1e-8
         p1 = pl(1:(m + 1) * n);
