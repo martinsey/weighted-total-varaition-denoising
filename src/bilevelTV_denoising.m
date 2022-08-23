@@ -12,18 +12,18 @@ end
 
 fprintf("Init variables... \n")
 % bilevel parameters
-n_w=7;      lambda=1e-9;        alpha_up=1e-2;  alpha_down=1e-8;
-tau_0=1.0;  c=1e-8;             theta_m=0.25;   theta_p=2;
+n_w=7;      lambda=1e-4;        alpha_up=1e-2;  alpha_down=1e-8;
+tau_0=5.0;  c=1e-8;             theta_m=0.25;   theta_p=2;
 sigma_down = (sigma)^2*(1-(sqrt(2)/n_w));%0.00798; 
 sigma_up  = (sigma)^2*(1+(sqrt(2)/n_w));%0.01202;
 fprintf("Init variables... done \n")
 
-w = ones(n_w, n_w) / n_w^2;
+w = fspecial("gaussian", n_w, 3);
 
 % lower level parameters
-beta=1e-4;          gamma=1e-4;     delta_initial=0.005; 
-eps_initial=5e-7;   tol_l=0.01;     delta_final=0.001;
-eps_final=3e-8;     theta_eps=0.6;
+beta=1e-3;          gamma=1e-3;     delta_initial=0.005; 
+eps_initial=5e-7;   tol_l=0.001;    delta_final=0.001;
+eps_final=1e-8;     theta_eps=0.6;
 
 fprintf("Init differntial matrices... \n")
 %preload matrics
@@ -56,23 +56,19 @@ H1_norm = @(v) 1 / sqrt(m*n) * sqrt(v(:)' * ((speye(m*n) - laplace_n_) * v(:)));
 J = @(alpha, divp) 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(R(divp) - sigma_up)).^2)) / (n*m) + 0.5 * sum(sum(arrayfun(@(v)smooth_max(v, 0),(sigma_down - R(divp))).^2)) / (n*m) + 0.5 * lambda * H1_norm(alpha(:))^2;
 
 %iteration variables
-divp_updated = [];
 alpha10_c = extend_interpolate_x * alpha(:);
 alpha01_c = extend_interpolate_y * alpha(:);
 prox = [];
 is_final = false;
 is_first_final = false;
 
+solve_lower_level
+
 fprintf("Executing gradient descent for reduced objective functional \n")
 while true
-    if size(divp_updated, 1) == 0 || (is_final && is_first_final)
+    if is_final && is_first_final
+        is_first_final=false;
         solve_lower_level;
-        
-        if is_final && is_first_final
-            is_first_final=false;
-        end
-        
-        u = f + divp;
         figure(1), imshow(f + divp)
         drawnow()
     end
@@ -102,17 +98,22 @@ while true
     while true
         alpha_updated = alpha_proj(alpha(:) - tau_k * J_grad, alpha_up, alpha_down);
         u = f + divp;
-            figure(2), surfc(flipud(reshape(alpha_updated,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
-            figure(1), imshow(f + divp)
-            drawnow()
+        figure(2), surfc(flipud(reshape(alpha_updated,n,m)),'FaceColor','red','EdgeColor','none');axis tight;view(-46,15);camlight(0,30);lighting phong;
+        figure(1), imshow(f + divp)
+        drawnow()
         alpha10_c = extend_interpolate_x * alpha_updated(:);
         alpha01_c = extend_interpolate_y * alpha_updated(:);
         solve_lower_level
         J_new = J(reshape(alpha_updated, m, n), reshape(divp, m, n));
 
         if J_new >  J_old + c * J_prime'*(alpha_updated(:) - alpha(:))
-            tau_k =  theta_m * tau_k
+            tau_k =  theta_m * tau_k;
             fprintf("Insufficient decrease of J from %f to %f and set tau=%f \n", J_old, J_new, tau_k)
+            prox = [prox, H1_norm(alpha_updated(:) - alpha(:))];
+            
+            if tau_k < 0.001
+                break
+            end
         else
             prox = [prox, H1_norm(alpha_updated(:) - alpha(:))];
             alpha = alpha_updated;
@@ -129,20 +130,20 @@ while true
     
     prox_measure = prox(end) / prox(1);
     
-    if ~is_final && (J_old - J_new) / J_new < 0.03
+    if prox_measure < 0.001 && is_final
+        fprintf("Executing gradient descent for reduced objective functional... done with J=%f \n", J_new)
+        break
+    end
+    
+    if ~is_final && (J_old - J_new) / J_old < 0.01
         delta = delta_final;
         eps=eps_final;
         tau_k=1;
         is_final=true;
         is_first_final=true;
     end
-    
-    if prox_measure < 4e-5
-        fprintf("Executing gradient descent for reduced objective functional... done with J=%f \n", J_new)
-        break
-    end
 end
 
-f_res = f_noise + divp;
+f_res = f + divp;
 
 end

@@ -48,9 +48,6 @@ while true
         fprintf("Convergence has been achieved with norm of g %f \n", g_err_new);
         break
     elseif g_err_new <= g_err_pltilde || g_err_new <= 1e-8
-        p1 = pl(1:(m + 1) * n);
-        p2 = pl((m + 1) * n + 1:((m + 1) * n + (n + 1) * m));
-        
         pltilde = pl;
         [pltilde_pen, d_pdelta_tilde, pk_norms] = newton_residual(delta, XX1, YY1, XX2, YY2, m, n, pltilde, alpha10_c, alpha01_c);
         A_k = -beta * laplace_c - grad_div_ + gamma * id + 1/eps_l * d_pdelta_tilde;
@@ -61,8 +58,8 @@ while true
             eps_l = max(theta_eps * eps_l, eps);
         end
     elseif iter_counter > max_iter
-        iter_counter = 0;
         eps_l = max(theta_eps * eps_l, eps);
+        iter_counter = 0;
     else
         iter_counter = iter_counter + 1;
     end
